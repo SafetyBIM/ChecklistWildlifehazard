@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistem Pelaporan Hewan Bandara</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.43/moment-timezone-with-data.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: '#eff6ff',
+                100: '#dbeafe',
+                200: '#bfdbfe',
+                300: '#93c5fd',
+                400: '#60a5fa',
+                500: '#3b82f6',
+                600: '#2563eb',
+                700: '#1d4ed8',
+                800: '#1e40af',
+                900: '#1e3a8a',
+                950: '#172554',
+              },
+              accent: {
+                50: '#f0f9ff',
+                100: '#e0f2fe',
+                200: '#bae6fd',
+                300: '#7dd3fc',
+                400: '#38bdf8',
+                500: '#0ea5e9',
+                600: '#0284c7',
+                700: '#0369a1',
+                800: '#075985',
+                900: '#0c4a6e',
+                950: '#082f49',
+              },
+              success: {
+                50: '#f0fdf4',
+                100: '#dcfce7',
+                200: '#bbf7d0',
+                300: '#86efac',
+                400: '#4ade80',
+                500: '#22c55e',
+                600: '#16a34a',
+                700: '#15803d',
+                800: '#166534',
+                900: '#14532d',
+              },
+              warning: {
+                50: '#fffbeb',
+                100: '#fef3c7',
+                200: '#fde68a',
+                300: '#fcd34d',
+                400: '#fbbf24',
+                500: '#f59e0b',
+                600: '#d97706',
+                700: '#b45309',
+                800: '#92400e',
+                900: '#78350f',
+              },
+              error: {
+                50: '#fef2f2',
+                100: '#fee2e2',
+                200: '#fecaca',
+                300: '#fca5a5',
+                400: '#f87171',
+                500: '#ef4444',
+                600: '#dc2626',
+                700: '#b91c1c',
+                800: '#991b1b',
+                900: '#7f1d1d',
+              },
+            },
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'sans-serif'],
+            },
+            boxShadow: {
+              soft: '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
+              medium: '0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+              large: '0 10px 40px -10px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-gray-50 text-gray-900 font-sans antialiased">
+    <!-- Header -->
+    <header class="bg-white shadow-soft border-b border-gray-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center py-6">
+          <div class="flex items-center space-x-4">
+            <div class="w-14 h-14 bg-gradient-to-br from-primary-500 to-accent-500 rounded-2xl flex items-center justify-center shadow-medium">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900">Sistem Pelaporan Hewan</h1>
+              <p class="text-gray-600 text-sm font-medium">Monitoring Satwa Liar Bandara Internasional Minangkabau</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-6">
+            <button
+              id="downloadExcel"
+              class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-success-500 to-success-600 text-white rounded-xl text-sm font-semibold hover:from-success-600 hover:to-success-700 focus:outline-none focus:ring-2 focus:ring-success-500 focus:ring-offset-2 transition-all duration-200 shadow-medium hover:shadow-large transform hover:-translate-y-0.5"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Download Excel
+            </button>
+            <div class="border-l border-gray-200 pl-6">
+              <img src="safe_n_risk_logo-removebg-preview.png" alt="Airport Safety & Risk Logo" class="custom-logo" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <!-- Input Form Section -->
+      <div class="bg-white rounded-3xl shadow-soft border border-gray-100">
+        <div class="px-8 py-6 border-b border-gray-100">
+          <h2 class="text-xl font-bold text-gray-900 flex items-center">
+            <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center mr-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </div>
+            Tambah Laporan Hewan
+          </h2>
+          <p class="text-gray-600 text-sm mt-2">Masukkan data pengamatan hewan di area bandara</p>
+        </div>
+
+        <div class="p-8">
+          <form id="laporanForm" class="space-y-8">
+            <!-- Row 1: Nama Hewan dengan tombol Simpan ke Pilihan Cepat -->
+            <div class="space-y-3">
+              <label for="namaHewan" class="block text-sm font-semibold text-gray-700">
+                Nama Hewan
+                <span class="text-error-500">*</span>
+              </label>
+              <div class="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="text"
+                  id="namaHewan"
+                  name="namaHewan"
+                  required
+                  class="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 text-sm placeholder-gray-400 text-gray-900"
+                  placeholder="Contoh: Burung Pipit, Kucing, dll."
+                />
+                <button
+                  type="button"
+                  id="saveToQuickSelectBtn"
+                  class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-warning-500 to-warning-600 text-white rounded-xl text-sm font-semibold hover:from-warning-600 hover:to-warning-700 focus:outline-none focus:ring-2 focus:ring-warning-500 focus:ring-offset-2 transition-all duration-200 whitespace-nowrap shadow-medium hover:shadow-large transform hover:-translate-y-0.5"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                  </svg>
+                  <span class="hidden sm:inline">Simpan ke Pilihan Cepat</span>
+                  <span class="sm:hidden">Simpan</span>
+                </button>
+              </div>
+              <p class="text-xs text-gray-500 mt-2 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Klik "Simpan" untuk menambahkan hewan ini ke daftar pilihan cepat
+              </p>
+            </div>
+
+            <!-- Row 2: Zona dan Jumlah -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="space-y-3">
+                <label for="zona" class="block text-sm font-semibold text-gray-700">
+                  Zona Lokasi
+                  <span class="text-error-500">*</span>
+                </label>
+                <select id="zona" name="zona" required class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 text-sm text-gray-900">
+                  <option value="" disabled selected>Pilih zona pengamatan</option>
+                  <option value="zona 1">Zona 1</option>
+                  <option value="zona 2">Zona 2</option>
+                  <option value="zona 3">Zona 3</option>
+                  <option value="zona 4 (MM)">Zona 4 (MM)</option>
+                  <option value="zona 4 (DVOR)">Zona 4 (DVOR)</option>
+                  <option value="Zona 4 (15)">Zona 4 (15)</option>
+                  <option value="zona 5">Zona 5</option>
+                </select>
+                <p class="text-xs text-gray-500">Pilih zona sesuai lokasi pengamatan hewan</p>
+              </div>
+
+              <div class="space-y-3">
+                <label for="jumlah" class="block text-sm font-semibold text-gray-700">
+                  Jumlah Hewan
+                  <span class="text-error-500">*</span>
+                </label>
+                <div class="relative">
+                  <input
+                    type="number"
+                    id="jumlah"
+                    name="jumlah"
+                    min="1"
+                    max="999"
+                    value="1"
+                    required
+                    class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 text-sm text-gray-900"
+                  />
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <span class="text-gray-500 text-sm">ekor</span>
+                  </div>
+                </div>
+                <p class="text-xs text-gray-500">Masukkan jumlah hewan yang diamati</p>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 pt-6 border-t border-gray-100">
+              <button
+                type="submit"
+                class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl font-semibold hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200 shadow-medium hover:shadow-large transform hover:-translate-y-0.5"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Tambah ke Daftar Sementara
+              </button>
+            </div>
+          </form>
+
+          <div id="statusMessage" class="mt-6 text-center font-medium text-sm min-h-[20px]"></div>
+        </div>
+      </div>
+
+      <!-- Quick Animal Selection -->
+      <div class="bg-white rounded-3xl shadow-soft border border-gray-100">
+        <div class="px-8 py-6 border-b border-gray-100">
+          <h3 class="text-lg font-bold text-gray-900 flex items-center">
+            <div class="w-8 h-8 bg-gradient-to-br from-accent-500 to-primary-500 rounded-lg flex items-center justify-center mr-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            Pilihan Cepat Hewan
+          </h3>
+          <p class="text-gray-600 text-sm mt-2">Klik untuk menambah hewan yang sering ditemui. Kelola daftar dengan menambah atau menghapus hewan.</p>
+        </div>
+
+        <div class="p-8">
+          <div id="quickAnimalsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <!-- Dynamic animal buttons will be rendered here by JavaScript -->
+          </div>
+          <div id="quickAnimalsMessage" class="mt-6 text-center text-gray-500 text-sm hidden">Belum ada hewan dalam daftar pilihan cepat. Tambahkan hewan dengan mengisi nama hewan di atas dan klik "Simpan ke Pilihan Cepat".</div>
+        </div>
+      </div>
+
+      <!-- Temporary Report List -->
+      <div class="bg-white rounded-3xl shadow-soft border border-gray-100">
+        <div class="px-8 py-6 border-b border-gray-100">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+            <div>
+              <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                <div class="w-8 h-8 bg-gradient-to-br from-warning-500 to-warning-600 rounded-lg flex items-center justify-center mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                Daftar Laporan Sementara
+              </h3>
+              <p class="text-gray-600 text-sm mt-2">Data yang belum disimpan ke spreadsheet</p>
+            </div>
+            <button
+              id="submitStagedDataButton"
+              disabled
+              class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl text-sm font-semibold hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-medium hover:shadow-large transform hover:-translate-y-0.5 disabled:transform-none"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+              </svg>
+              Simpan Semua
+            </button>
+          </div>
+        </div>
+
+        <!-- Weather Selection Section -->
+        <div class="px-8 py-6 bg-gray-50 border-b border-gray-100">
+          <h4 class="text-sm font-semibold text-gray-700 mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-accent-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 005-5V7a4 4 0 00-4-4H9a5 5 0 00-5 5v2.5" />
+            </svg>
+            Pilih Kondisi Cuaca
+          </h4>
+          <div class="flex space-x-4">
+            <button type="button" id="weatherHujanBtn" class="weather-btn bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 focus:ring-blue-500">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 10a6 6 0 01-5 5v3a2 2 0 01-2 2H8a2 2 0 01-2-2v-3a6 6 0 01-5-5h18zM12 2v8M16 4.5l-3 3M8 4.5l3 3" />
+              </svg>
+              Hujan
+            </button>
+            <button type="button" id="weatherKeringBtn" class="weather-btn bg-gradient-to-r from-success-500 to-success-600 text-white hover:from-success-600 hover:to-success-700 focus:ring-success-500">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.325-6.075l-.707-.707M6.707 6.707l-.707-.707m12.62 12.62l-.707-.707M6.707 17.293l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                />
+              </svg>
+              Kering
+            </button>
+          </div>
+          <div id="weatherStatusMessage" class="mt-4 text-center font-medium text-sm min-h-[20px]"></div>
+        </div>
+
+        <div class="p-8">
+          <div id="stagingTableContainer" class="overflow-x-auto">
+            <div class="text-center py-12">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <p class="text-gray-500 text-sm">Daftar laporan sementara kosong</p>
+              <p class="text-gray-400 text-xs mt-1">Tambahkan laporan menggunakan form di atas</p>
+            </div>
+          </div>
+          <div id="stagingStatusMessage" class="mt-4 text-center font-medium text-sm min-h-[20px]"></div>
+        </div>
+      </div>
+
+      <!-- Zone Map - Full Width -->
+      <div class="bg-white rounded-3xl shadow-soft border border-gray-100">
+        <div class="px-8 py-6 border-b border-gray-100">
+          <h3 class="text-lg font-bold text-gray-900 flex items-center">
+            <div class="w-8 h-8 bg-gradient-to-br from-success-500 to-success-600 rounded-lg flex items-center justify-center mr-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m-6 3l6-3"
+                />
+              </svg>
+            </div>
+            Peta Zona Bandara
+          </h3>
+          <p class="text-gray-600 text-sm mt-2">Layout zona monitoring satwa liar di Bandara Internasional Minangkabau</p>
+        </div>
+
+        <div class="p-8">
+          <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+            <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Untitled%20project-4XYUe0vjOnxF3BwwCwgw9ynnlCPnLA.jpeg" alt="Peta Zona Bandara" class="w-full h-auto rounded-xl shadow-soft border border-gray-200" />
+            <div class="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-sm">
+              <div class="flex items-center space-x-3 bg-white p-3 rounded-lg border border-gray-200">
+                <div class="w-4 h-4 bg-blue-500 rounded-full shadow-sm flex-shrink-0"></div>
+                <span class="text-gray-700 font-medium">Zona 1</span>
+              </div>
+              <div class="flex items-center space-x-3 bg-white p-3 rounded-lg border border-gray-200">
+                <div class="w-4 h-4 bg-red-500 rounded-full shadow-sm flex-shrink-0"></div>
+                <span class="text-gray-700 font-medium">Zona 2</span>
+              </div>
+              <div class="flex items-center space-x-3 bg-white p-3 rounded-lg border border-gray-200">
+                <div class="w-4 h-4 bg-green-500 rounded-full shadow-sm flex-shrink-0"></div>
+                <span class="text-gray-700 font-medium">Zona 3</span>
+              </div>
+              <div class="flex items-center space-x-3 bg-white p-3 rounded-lg border border-gray-200">
+                <div class="w-4 h-4 bg-purple-500 rounded-full shadow-sm flex-shrink-0"></div>
+                <span class="text-gray-700 font-medium">Zona 4 MM</span>
+              </div>
+              <div class="flex items-center space-x-3 bg-white p-3 rounded-lg border border-gray-200">
+                <div class="w-4 h-4 bg-teal-500 rounded-full shadow-sm flex-shrink-0"></div>
+                <span class="text-gray-700 font-medium">Zona 4 DVOR</span>
+              </div>
+              <div class="flex items-center space-x-3 bg-white p-3 rounded-lg border border-gray-200">
+                <div class="w-4 h-4 bg-orange-500 rounded-full shadow-sm flex-shrink-0"></div>
+                <span class="text-gray-700 font-medium">Zona 4.15</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Global Report Details -->
+      <div class="bg-white rounded-3xl shadow-soft border border-gray-100">
+        <div class="px-8 py-6 border-b border-gray-100">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+            <div>
+              <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a4 4 0 01-4-4V5a4 4 0 014-4h10a4 4 0 014 4v12a4 4 0 01-4 4z" />
+                  </svg>
+                </div>
+                Detail Laporan Lengkap Spreadsheet
+              </h3>
+              <p class="text-gray-600 text-sm mt-2">Data lengkap dari semua laporan yang tersimpan</p>
+            </div>
+            <div class="flex items-center space-x-4 flex-col sm:flex-row w-full sm:w-auto">
+              <div class="relative w-full sm:w-64">
+                <input
+                  type="text"
+                  id="searchInput"
+                  placeholder="Cari data..."
+                  disabled
+                  class="pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 text-sm w-full text-gray-900 placeholder-gray-400"
+                />
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-3 top-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <!-- New "Go to Spreadsheet" Button -->
+              <button
+                id="goToSpreadsheetBtn"
+                class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-medium hover:shadow-large transform hover:-translate-y-0.5 w-full sm:w-auto"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                Go to Spreadsheet
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-8">
+          <div id="tabelData" class="overflow-x-auto">
+            <div class="text-center py-12">
+              <svg class="animate-spin h-8 w-8 mx-auto text-primary-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <p class="text-gray-500 text-sm">Memuat data dari spreadsheet...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-100 mt-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="text-center">
+          <p class="text-gray-600 text-sm">© 2025 Sistem Pelaporan Hewan Bandara Internasional Minangkabau. All rights reserved. Dervio Rahmatdianto & Fardhan Zikri</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
